@@ -1,8 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const HeroSection = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-red-50 pt-20">
       <div className="container mx-auto px-4">
@@ -18,13 +22,15 @@ export const HeroSection = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button 
-              size="lg" 
-              className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 text-lg hover-scale"
-            >
-              Mətni yoxla
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to={isAuthenticated ? "/profile" : "/login"}>
+              <Button 
+                size="lg" 
+                className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 text-lg hover-scale"
+              >
+                Mətni yoxla
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Button 
               variant="outline" 
               size="lg" 
