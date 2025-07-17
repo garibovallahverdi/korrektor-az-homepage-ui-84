@@ -80,7 +80,7 @@ export const Header = () => {
                 </Link>
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="bg-red-500 text-white text-xs">
-                    {user ? getInitials(user.first_name, user.last_name) : 'U'}
+                    {user ? getInitials(user.fullname.split("")[0], user.fullname.split("")[1]) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <Button

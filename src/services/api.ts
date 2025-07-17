@@ -6,23 +6,24 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
+  fullname: string;
+  username: string;
   email: string;
   password: string;
-  first_name: string;
-  last_name: string;
+  password2: string;
 }
 
 export interface AuthResponse {
   access: string;
   refresh: string;
-  user: User;
 }
 
 export interface User {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  fullname: string;
+  username: string;
+  plan:string;
 }
 
 export interface TextCheckRequest {
@@ -30,9 +31,19 @@ export interface TextCheckRequest {
 }
 
 export interface TextCheckResponse {
-  original_text: string;
-  corrected_text: string;
-  suggestions: Suggestion[];
+  corrected_text: {
+    errors: TextError[];
+    output_sentence: string;
+  };
+}
+
+export interface TextError {
+  type: string;
+  original_fragment: string;
+  start_index: number;
+  end_index: number;
+  explanation: string;
+  suggestions: string[];
 }
 
 export interface Suggestion {
@@ -134,6 +145,20 @@ class ApiService {
     const data = await response.json();
     localStorage.setItem('accessToken', data.access);
   }
+
+
+  
+async updateUser(data: {
+  fullname?: string;
+  username?: string;
+  email?: string;
+  plan?: string;
+}): Promise<User> {
+  return this.request<User>(Endpoints.me, {
+    method: 'PATCH', // veya PUT, backend'in tercihine göre
+    body: JSON.stringify(data),
+  });
+}
 
   async checkText(text: string): Promise<TextCheckResponse> {
     return this.request<TextCheckResponse>(Endpoints.checkText, {

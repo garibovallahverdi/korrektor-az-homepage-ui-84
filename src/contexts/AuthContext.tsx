@@ -1,3 +1,5 @@
+// AuthContext.tsx (veya benzeri dosya)
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiService, User, LoginRequest, RegisterRequest } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +11,12 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (data: {
+    fullname?: string;
+    username?: string;
+    email?: string;
+    plan?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,11 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await apiService.login(credentials);
-      setUser(response.user);
       toast({
         title: "Giriş uğurlu",
         description: "Xoş gəldiniz!",
       });
+      await checkAuthStatus(); // Giriş sonrası kullanıcıyı güncelle
     } catch (error) {
       console.error('Login failed:', error);
       toast({
@@ -76,11 +84,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await apiService.register(data);
-      setUser(response.user);
       toast({
         title: "Qeydiyyat uğurlu",
         description: "Hesabınız yaradıldı!",
       });
+      await checkAuthStatus(); // Kayıt sonrası kullanıcıyı güncelle
     } catch (error) {
       console.error('Registration failed:', error);
       toast({
@@ -108,6 +116,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateUser = async (data: {
+    fullname?: string;
+    username?: string;
+    email?: string;
+    plan?: string;
+    password?: string;
+  }) => {
+    try {
+      setIsLoading(true);
+      const updatedUser = await apiService.updateUser(data);
+      setUser(updatedUser);
+      toast({
+        title: "Profil yeniləndi",
+        description: "Məlumatlarınız uğurla yeniləndi.",
+      });
+    } catch (error) {
+      console.error('Update failed:', error);
+      toast({
+        title: "Yeniləmə xətası",
+        description: "Profil məlumatlarınızı yeniləyərkən xəta baş verdi.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -115,6 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
   };
 
   return (

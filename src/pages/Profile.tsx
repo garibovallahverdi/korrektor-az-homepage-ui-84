@@ -55,11 +55,11 @@ export const Profile = () => {
               <CardHeader className="text-center">
                 <Avatar className="w-20 h-20 mx-auto mb-4">
                   <AvatarFallback className="bg-red-500 text-white text-xl">
-                    {user ? getInitials(user.first_name, user.last_name) : 'U'}
+                    {user ? getInitials(user.fullname.split("")[0], user.fullname.split("")[1]) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-lg">
-                  {user ? `${user.first_name} ${user.last_name}` : 'İstifadəçi'}
+                  {user ? `${user.fullname}` : 'İstifadəçi'}
                 </CardTitle>
                 <CardDescription>
                   Korrektor.az istifadəçisi
