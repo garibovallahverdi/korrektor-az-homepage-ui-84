@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Login failed:', error);
       toast({
         title: "Giriş xətası",
-        description: "E-mail və ya şifrə yanlışdır.",
+        description: "Username və ya şifrə yanlışdır.",
         variant: "destructive",
       });
       throw error;
