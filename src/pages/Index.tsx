@@ -9,6 +9,7 @@ import { ProFeaturesSection } from "@/components/ProFeaturesSection";
 import { ContactSection } from "@/components/ContactSection";
 import { FAQSection } from "@/components/FAQSection";
 import { Footer } from "@/components/Footer";
+import { HeroDemoSection } from "@/components/HeroDemoSection";
 
 const Index = () => {
   useEffect(() => {
@@ -63,9 +64,10 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <HeroSection />
+        <HeroDemoSection />
+        {/* <HeroSection /> */}
         <ServicesSection />
-        <DemoSection />
+        {/* <DemoSection /> */}
         <PricingSection />
         <TestimonialsSection />
         <ProFeaturesSection />
