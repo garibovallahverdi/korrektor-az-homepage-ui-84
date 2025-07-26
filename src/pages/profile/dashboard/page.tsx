@@ -1,6 +1,6 @@
 // app/profile/dashboard/page.tsx
 
-import { TextChecker } from '@/components/TextChecker';
+import  {TextChecker}  from '@/components/TextChecker';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 

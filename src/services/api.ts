@@ -105,6 +105,18 @@ class ApiService {
     localStorage.setItem('refreshToken', response.refresh);
     return response;
   }
+    async verifyAccount(token: string, verifyToken: string): Promise<void> {
+    const url = Endpoints.verifyAccount(token, verifyToken);
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Doğrulama başarısız! Status: ${response.status}`);
+    }
+ 
+    return response.json();
+  }
 
   async logout(): Promise<void> {
     const refreshToken = localStorage.getItem('refreshToken');

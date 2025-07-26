@@ -17,13 +17,14 @@ export const TextChecker = () => {
   const { toast } = useToast();
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isManualEdit = useRef(true);
 
   const checkText = async (text: string = inputText) => {
     if (!text.trim()) {
       toast({
-        title: "Xəta",
-        description: "Zəhmət olmasa mətn daxil edin",
-        variant: "destructive",
+        title: 'Xəta',
+        description: 'Zəhmət olmasa mətn daxil edin',
+        variant: 'destructive',
       });
       return;
     }
@@ -38,20 +39,20 @@ export const TextChecker = () => {
 
       if ((response.corrected_text.errors || []).length > 0) {
         toast({
-          title: "Yoxlama tamamlandı",
+          title: 'Yoxlama tamamlandı',
           description: `${response.corrected_text.errors.length} təklif tapıldı`,
         });
       } else {
         toast({
-          title: "Əla!",
-          description: "Heç bir xəta tapılmadı",
+          title: 'Əla!',
+          description: 'Heç bir xəta tapılmadı',
         });
       }
     } catch (error) {
       toast({
-        title: "Xəta",
-        description: "Mətn yoxlanılarkən xəta baş verdi",
-        variant: "destructive",
+        title: 'Xəta',
+        description: 'Mətn yoxlanılarkən xəta baş verdi',
+        variant: 'destructive',
       });
     } finally {
       setIsChecking(false);
@@ -62,30 +63,25 @@ export const TextChecker = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Kopyalandı",
-      description: "Mətn buferə kopyalandı",
+      title: 'Kopyalandı',
+      description: 'Mətn buferə kopyalandı',
     });
   };
 
   const applySuggestion = (error: TextError, selectedWord: string) => {
     const original = error.original_fragment;
-
     const index = inputText.indexOf(original);
-    if (index === -1) {
-      console.warn('Orijinal kelime metinde bulunamadı:', original);
-      return;
-    }
+    if (index === -1) return;
 
-    const before = inputText.substring(0, index);
-    const after = inputText.substring(index + original.length);
+    const updatedText =
+      inputText.substring(0, index) + selectedWord + inputText.substring(index + original.length);
 
-    const updatedText = before + selectedWord + after;
+    isManualEdit.current = false;
     setInputText(updatedText);
-
-    setErrors(prev => prev.filter(e => e !== error));
+    setErrors((prev) => prev.filter((e) => e !== error));
 
     toast({
-      title: "Tətbiq edildi",
+      title: 'Tətbiq edildi',
       description: `"${original}" → "${selectedWord}"`,
     });
   };
@@ -103,11 +99,16 @@ export const TextChecker = () => {
       return;
     }
 
+    if (!isManualEdit.current) {
+      isManualEdit.current = true;
+      return;
+    }
+
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
 
     debounceTimeout.current = setTimeout(() => {
       checkText(inputText);
-    }, 1000);
+    }, 800);
 
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
@@ -117,8 +118,7 @@ export const TextChecker = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Metin yazılan taraf: %60 genişlik */}
-        <Card className="flex-1 shadow-sm rounded-md">
+        <Card className="flex-1 shadow-sm rounded-xl border border-gray-200">
           <CardHeader>
             <CardTitle className="text-xl font-semibold flex items-center gap-3">
               Mətn daxil edin
@@ -127,7 +127,7 @@ export const TextChecker = () => {
               )}
             </CardTitle>
             <CardDescription className="text-gray-600 mt-1">
-              Mətninizi daxil edin və ya yazmağı dayandırdıqda avtomatik yoxlama başlasın.
+              Yazmağı dayandırdıqdan sonra avtomatik yoxlanacaq.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -135,7 +135,7 @@ export const TextChecker = () => {
               placeholder="Burada mətninizi yazın..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              className="min-h-[320px] resize-none text-base font-normal focus:ring-1 focus:ring-red-500 rounded-md border border-gray-300"
+              className="min-h-[320px] resize-none text-base font-normal focus:ring-1 focus:ring-red-500 rounded-lg border border-gray-300"
             />
 
             <div className="flex flex-wrap gap-3 mt-4">
@@ -164,13 +164,12 @@ export const TextChecker = () => {
           </CardContent>
         </Card>
 
-        {/* Öneriler tarafı: %40 genişlik */}
-        <Card className="w-full lg:w-[40%] shadow-sm rounded-md">
+        <Card className="w-full lg:w-[40%] shadow-sm rounded-xl border border-gray-200">
           <CardHeader>
             <CardTitle className="text-xl font-semibold flex items-center gap-3">
               Nəticə və təkliflər
               {result && (
-                <Badge variant={errors.length > 0 ? "destructive" : "default"} className="text-sm py-1 px-3">
+                <Badge variant={errors.length > 0 ? 'destructive' : 'default'} className="text-sm py-1 px-3">
                   {errors.length > 0 ? `${errors.length} təklif` : 'Xəta yoxdur'}
                 </Badge>
               )}
@@ -182,7 +181,6 @@ export const TextChecker = () => {
           <CardContent className="space-y-6">
             {result ? (
               <>
-                {/* Düzəldilmiş mətn */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-gray-800 text-lg">Düzəldilmiş mətn:</h4>
@@ -202,7 +200,6 @@ export const TextChecker = () => {
 
                 <Separator />
 
-                {/* Təkliflər */}
                 <div>
                   <h4 className="font-medium text-gray-800 mb-2">Təkliflər:</h4>
                   {errors.length > 0 ? (
@@ -223,7 +220,6 @@ export const TextChecker = () => {
                                 <Button
                                   key={wordIndex}
                                   variant="outline"
-                                  size="xs"
                                   onClick={() => applySuggestion(err, word)}
                                   className="text-xs px-2 py-1"
                                 >

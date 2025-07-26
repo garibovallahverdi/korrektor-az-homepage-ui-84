@@ -5,15 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./pagess/Index";  
-import { Login } from "./pagess/Login";
-import { Register } from "./pagess/Register";
-import ProfilePage from "./pagess/profile/layout";
-import NotFound from "./pagess/NotFound";
-import ProfileLayout from "./pagess/profile/layout";
-import DashboardPage from "./pagess/profile/dashboard/page";
-import SettingsPage from "./pagess/profile/settings/page";
+import Index from "./pages/Index";  
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import ProfilePage from "./pages/profile/layout";
+import NotFound from "./pages/NotFound";
+import ProfileLayout from "./pages/profile/layout";
+import DashboardPage from "./pages/profile/dashboard/page";
+import SettingsPage from "./pages/profile/settings/page";
 import PublicRoute from "./components/PublicRoute";
+import VerifyEmailPage from "./pages/verify-email/page";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +35,12 @@ const App = () => (
   <Route path="/register" element={
     <PublicRoute>
       <Register />
+    </PublicRoute>
+  } />
+
+    <Route path="/verify-email/:token/:verifyToken" element={
+    <PublicRoute>
+      <VerifyEmailPage />
     </PublicRoute>
   } />
           
