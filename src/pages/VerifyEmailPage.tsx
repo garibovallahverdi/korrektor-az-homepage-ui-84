@@ -18,7 +18,7 @@ const VerifyEmailPage: React.FC = () => {
         const res = await apiService.verifyAccount(token, verifyToken);
         console.log(res, 'E-poçt doğrulama uğurlu oldu');
         
-        toast.success(res?.message || 'E-poçt doğrulama uğurlu oldu');
+        toast.success('E-poçt doğrulama uğurlu oldu');
         setSuccess(true);
       } catch (err) {
         console.error('Doğrulama xətası:', err);

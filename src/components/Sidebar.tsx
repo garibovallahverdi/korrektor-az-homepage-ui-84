@@ -1,42 +1,81 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LogOut, UserCircle, Settings } from 'lucide-react';
+import { LogOut, UserCircle, Settings, X, HomeIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export const Sidebar = ({ onClose }: SidebarProps) => {
   const { logout } = useAuth();
   const location = useLocation();
 
   const navItems = [
     { to: '/profile/dashboard', label: 'Panel', icon: <UserCircle className="w-4 h-4" /> },
     { to: '/profile/settings', label: 'Tənzimləmələr', icon: <Settings className="w-4 h-4" /> },
+    { to: '/', label: 'Ana Səhifə', icon: <HomeIcon className="w-4 h-4" /> },
   ];
 
+  const handleNavClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="w-64 bg-white border-r p-4">
-      <div className="space-y-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${
-                isActive ? 'bg-blue-100 text-blue-800' : 'text-gray-700 hover:bg-gray-100'
-              }`
-            }
+    <aside className="w-64 bg-white border-r h-screen shadow-lg lg:shadow-none">
+      {/* Mobile Close Button */}
+      {onClose && (
+        <div className="lg:hidden flex justify-end p-4 border-b">
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
           >
-            {item.icon}
-            {item.label}
-          </NavLink>
-        ))}
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <div className="p-4">
+        <div className="space-y-2">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? 'bg-red-100 text-red-800' : 'text-gray-700 hover:bg-gray-100'
+                }`
+              }
+            >
+              {item.icon}
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="mt-6 flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-100 w-full rounded-md transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Çıxış
+        </button>
       </div>
-      <button
-        onClick={logout}
-        className="mt-6 flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-100 w-full rounded-md"
-      >
-        <LogOut className="w-4 h-4" />
-        Çıxış
-      </button>
     </aside>
   );
 };

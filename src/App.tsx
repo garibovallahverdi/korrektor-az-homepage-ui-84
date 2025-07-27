@@ -14,7 +14,7 @@ import ProfileLayout from "./pages/profile/layout";
 import DashboardPage from "./pages/profile/dashboard/page";
 import SettingsPage from "./pages/profile/settings/page";
 import PublicRoute from "./components/PublicRoute";
-import VerifyEmailPage from "./pages/verify-email/page";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 const queryClient = new QueryClient();
 
 const App = () => (
