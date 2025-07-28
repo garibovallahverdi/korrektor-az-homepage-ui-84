@@ -10,5 +10,5 @@ export const Endpoints = {
   tokenRefresh: `${BASE_URL}/v1/auth/token/refresh/`,
   users: `${BASE_URL}/v1/auth/users/`,
   userById: (id: number) => `${BASE_URL}/v1/auth/users/${id}/`,
-  checkText: `${BASE_URL}/v1/correction/check-text/`,
+  checkText: `${BASE_URL}/v1/correction/check-text-gemini/`,
 };
