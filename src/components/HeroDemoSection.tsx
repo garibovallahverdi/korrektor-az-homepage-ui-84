@@ -22,7 +22,7 @@ export const HeroDemoSection = () => {
       navigate(`/profile/dashboard?text=${encodedText}`);
     } else {
       // Giriş yapmamışsa login'e git, sonra TextChecker'a yönlendirilmesi için
-      navigate(`/login?redirect=/profile/dashboard&text=${encodedText}`);
+      navigate(`/register?redirect=/profile/dashboard&text=${encodedText}`);
     }
   };
 

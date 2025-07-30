@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,7 @@ export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +37,48 @@ export const Register = () => {
         password,
         password2,
       });
-      navigate('/profile');
+      
+      // URL parametrelerini kontrol et
+      const searchParams = new URLSearchParams(location.search);
+      const redirectPath = searchParams.get('redirect') || '/profile';
+      const textParam = searchParams.get('text');
+      
+      // Eğer text parametresi varsa, onu koruyarak yönlendir
+      if (textParam) {
+        const targetUrl = `${redirectPath}?text=${encodeURIComponent(textParam)}`;
+        navigate(targetUrl);
+      } else {
+        navigate(redirectPath);
+      }
+      
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Login linkine parametreleri aktar
+  const getLoginLink = () => {
+    const searchParams = new URLSearchParams(location.search);
+    const textParam = searchParams.get('text');
+    const redirectParam = searchParams.get('redirect');
+    
+    let loginUrl = '/login';
+    const params = new URLSearchParams();
+    
+    if (redirectParam) {
+      params.set('redirect', redirectParam);
+    }
+    if (textParam) {
+      params.set('text', textParam);
+    }
+    
+    if (params.toString()) {
+      loginUrl += `?${params.toString()}`;
+    }
+    
+    return loginUrl;
   };
 
   return (
@@ -153,7 +190,7 @@ export const Register = () => {
 
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-600">Hesabınız var? </span>
-            <Link to="/login" className="text-red-500 hover:text-red-600 font-medium">
+            <Link to={getLoginLink()} className="text-red-500 hover:text-red-600 font-medium">
               Daxil ol
             </Link>
           </div>
