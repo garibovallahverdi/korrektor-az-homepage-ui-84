@@ -1,4 +1,6 @@
+// TextChecker.tsx - Güncellenmiş versiyon
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,9 +18,30 @@ export const TextChecker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const isManualEdit = useRef(true);
+  const hasLoadedFromUrl = useRef(false);
+
+  // URL parametresinden metni al
+  useEffect(() => {
+    if (!hasLoadedFromUrl.current) {
+      const searchParams = new URLSearchParams(location.search);
+      const textParam = searchParams.get('text');
+      
+      if (textParam) {
+        const decodedText = decodeURIComponent(textParam);
+        setInputText(decodedText);
+        hasLoadedFromUrl.current = true;
+        
+        // URL'den gelen metni otomatik olarak kontrol et
+        setTimeout(() => {
+          checkText(decodedText);
+        }, 500);
+      }
+    }
+  }, [location.search]);
 
   const checkText = async (text: string = inputText) => {
     if (!text.trim()) {
@@ -93,6 +116,7 @@ export const TextChecker = () => {
     setResult(null);
     setErrors([]);
     setShowResults(false);
+    hasLoadedFromUrl.current = false;
   };
 
   useEffect(() => {
@@ -104,6 +128,11 @@ export const TextChecker = () => {
 
     if (!isManualEdit.current) {
       isManualEdit.current = true;
+      return;
+    }
+
+    // URL'den yüklenen metni debounce etme
+    if (hasLoadedFromUrl.current && inputText === decodeURIComponent(new URLSearchParams(location.search).get('text') || '')) {
       return;
     }
 
