@@ -1,3 +1,4 @@
+
 import { Endpoints } from './endpoints';
 
 export interface LoginRequest {
@@ -23,7 +24,7 @@ export interface User {
   email: string;
   fullname: string;
   username: string;
-  plan:string;
+  plan: string;
 }
 
 export interface TextCheckRequest {
@@ -53,6 +54,19 @@ export interface Suggestion {
   type: string;
 }
 
+// Custom API Error class
+export class ApiError extends Error {
+  public status: number;
+  public data: any;
+
+  constructor(message: string, status: number, data: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 class ApiService {
   private getAuthHeaders() {
     const token = localStorage.getItem('accessToken');
@@ -72,47 +86,86 @@ class ApiService {
       },
     });
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        await this.refreshToken();
-        // Retry the request with new token
-        return this.request<T>(url, options);
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Response body'yi her durumda parse et
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      responseData = {};
     }
 
-    return response.json();
+    if (!response.ok) {
+      if (response.status === 401) {
+        try {
+          await this.refreshToken();
+          // Retry the request with new token
+          return this.request<T>(url, options);
+        } catch (refreshError) {
+          // Refresh token de başarısız olursa, orijinal hatayı fırlat
+          throw new ApiError(
+            `HTTP error! status: ${response.status}`,
+            response.status,
+            responseData
+          );
+        }
+      }
+      
+      // API Error olarak fırlat - response data dahil
+      throw new ApiError(
+        `HTTP error! status: ${response.status}`,
+        response.status,
+        responseData
+      );
+    }
+
+    return responseData;
   }
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>(Endpoints.login, {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const response = await this.request<AuthResponse>(Endpoints.login, {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
 
-    localStorage.setItem('accessToken', response.access);
-    localStorage.setItem('refreshToken', response.refresh);
-    return response;
+      localStorage.setItem('accessToken', response.access);
+      localStorage.setItem('refreshToken', response.refresh);
+      return response;
+    } catch (error) {
+      console.error('Login API Error:', error);
+      throw error; // Re-throw to be handled by AuthContext
+    }
   }
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>(Endpoints.register, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await this.request<AuthResponse>(Endpoints.register, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
 
-    localStorage.setItem('accessToken', response.access);
-    localStorage.setItem('refreshToken', response.refresh);
-    return response;
+      localStorage.setItem('accessToken', response.access);
+      localStorage.setItem('refreshToken', response.refresh);
+      return response;
+    } catch (error) {
+      console.error('Register API Error:', error);
+      throw error; // Re-throw to be handled by AuthContext
+    }
   }
-    async verifyAccount(token: string, verifyToken: string): Promise<void> {
+
+  async verifyAccount(token: string, verifyToken: string): Promise<void> {
     const url = Endpoints.verifyAccount(token, verifyToken);
     const response = await fetch(url, {
       method: 'GET',
     });
     
     if (!response.ok) {
-      throw new Error(`Doğrulama başarısız! Status: ${response.status}`);
+      const responseData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        `Doğrulama başarısız! Status: ${response.status}`,
+        response.status,
+        responseData
+      );
     }
  
     return response.json();
@@ -158,19 +211,17 @@ class ApiService {
     localStorage.setItem('accessToken', data.access);
   }
 
-
-  
-async updateUser(data: {
-  fullname?: string;
-  username?: string;
-  email?: string;
-  plan?: string;
-}): Promise<User> {
-  return this.request<User>(Endpoints.me, {
-    method: 'PATCH', // veya PUT, backend'in tercihine göre
-    body: JSON.stringify(data),
-  });
-}
+  async updateUser(data: {
+    fullname?: string;
+    username?: string;
+    email?: string;
+    plan?: string;
+  }): Promise<User> {
+    return this.request<User>(Endpoints.me, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
 
   async checkText(text: string): Promise<TextCheckResponse> {
     return this.request<TextCheckResponse>(Endpoints.checkText, {

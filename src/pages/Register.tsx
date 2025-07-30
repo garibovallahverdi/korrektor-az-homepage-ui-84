@@ -18,7 +18,8 @@ export const Register = () => {
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  const [clientErrors, setClientErrors] = useState<string[]>([]);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,13 +57,14 @@ export const Register = () => {
       newErrors.push('Şifrələr uyğun deyil.');
     }
 
-    setErrors(newErrors);
+    setClientErrors(newErrors);
     return newErrors.length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors([]);
+    setClientErrors([]);
+    setServerErrors([]);
 
     // Client-side validation
     if (!validateForm()) {
@@ -72,30 +74,34 @@ export const Register = () => {
     setIsLoading(true);
 
     try {
-      await register({
+      const result = await register({
         fullname,
         username,
         email,
         password,
         password2,
       });
+      console.log(result);
       
-      // URL parametrelerini kontrol et
-      const searchParams = new URLSearchParams(location.search);
-      const redirectPath = searchParams.get('redirect') || '/profile';
-      const textParam = searchParams.get('text');
-      
-      // Eğer text parametresi varsa, onu koruyarak yönlendir
-      if (textParam) {
-        const targetUrl = `${redirectPath}?text=${encodeURIComponent(textParam)}`;
-        navigate(targetUrl);
-      } else {
-        navigate(redirectPath);
+      if (result.success) {
+        // URL parametrelerini kontrol et
+        const searchParams = new URLSearchParams(location.search);
+        const redirectPath = searchParams.get('redirect') || '/profile';
+        const textParam = searchParams.get('text');
+        
+        // Eğer text parametresi varsa, onu koruyarak yönlendir
+        if (textParam) {
+          const targetUrl = `${redirectPath}?text=${encodeURIComponent(textParam)}`;
+          navigate(targetUrl);
+        } else {
+          navigate(redirectPath);
+        }
+      } else if (result.errors) {
+        setServerErrors(result.errors);
       }
       
     } catch (error) {
-      // AuthContext'te hata mesajı gösterilir, burada ek bir şey yapmaya gerek yok
-      console.error('Registration error:', error);
+      console.error('Registration error:', error.username);
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +130,9 @@ export const Register = () => {
     return loginUrl;
   };
 
+  // Tüm hataları birleştir
+  const allErrors = [...clientErrors, ...serverErrors];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -135,12 +144,12 @@ export const Register = () => {
         </CardHeader>
         <CardContent>
           {/* Hata mesajları */}
-          {errors.length > 0 && (
+          {allErrors.length > 0 && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <ul className="list-disc list-inside space-y-1">
-                  {errors.map((error, index) => (
+                  {allErrors.map((error, index) => (
                     <li key={index} className="text-sm">{error}</li>
                   ))}
                 </ul>
