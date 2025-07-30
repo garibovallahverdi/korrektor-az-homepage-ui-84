@@ -1,4 +1,3 @@
-// AuthContext.tsx (veya benzeri dosya)
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiService, User, LoginRequest, RegisterRequest } from '@/services/api';
@@ -32,6 +31,64 @@ export const useAuth = () => {
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Hata mesajlarını anlamlı şekilde çeviren fonksiyon
+const getErrorMessage = (error: any, type: 'login' | 'register') => {
+  if (error?.response?.data) {
+    const errorData = error.response.data;
+    
+    // API'den gelen hata mesajları
+    if (errorData.detail) {
+      return errorData.detail;
+    }
+    
+    // Specific field errors
+    if (errorData.username) {
+      return `İstifadəçi adı: ${Array.isArray(errorData.username) ? errorData.username[0] : errorData.username}`;
+    }
+    
+    if (errorData.email) {
+      return `E-mail: ${Array.isArray(errorData.email) ? errorData.email[0] : errorData.email}`;
+    }
+    
+    if (errorData.password) {
+      return `Şifrə: ${Array.isArray(errorData.password) ? errorData.password[0] : errorData.password}`;
+    }
+    
+    if (errorData.password2) {
+      return `Şifrə təkrarı: ${Array.isArray(errorData.password2) ? errorData.password2[0] : errorData.password2}`;
+    }
+    
+    if (errorData.fullname) {
+      return `Ad Soyad: ${Array.isArray(errorData.fullname) ? errorData.fullname[0] : errorData.fullname}`;
+    }
+    
+    // Non-field errors
+    if (errorData.non_field_errors) {
+      return Array.isArray(errorData.non_field_errors) ? errorData.non_field_errors[0] : errorData.non_field_errors;
+    }
+  }
+  
+  // HTTP status kodlarına göre varsayılan mesajlar
+  if (error?.response?.status === 400) {
+    return type === 'login' ? 'İstifadəçi adı və ya şifrə yanlışdır.' : 'Daxil etdiyiniz məlumatları yoxlayın.';
+  }
+  
+  if (error?.response?.status === 401) {
+    return 'İstifadəçi adı və ya şifrə yanlışdır.';
+  }
+  
+  if (error?.response?.status === 409) {
+    return 'Bu istifadəçi adı və ya e-mail artıq istifadə olunur.';
+  }
+  
+  if (error?.response?.status >= 500) {
+    return 'Server xətası baş verdi. Zəhmət olmasa daha sonra cəhd edin.';
+  }
+  
+  // Varsayılan mesajlar
+  return type === 'login' ? 'Giriş zamanı xəta baş verdi.' : 'Qeydiyyat zamanı xəta baş verdi.';
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -69,9 +126,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await checkAuthStatus(); // Giriş sonrası kullanıcıyı güncelle
     } catch (error) {
       console.error('Login failed:', error);
+      const errorMessage = getErrorMessage(error, 'login');
       toast({
         title: "Giriş xətası",
-        description: "Username və ya şifrə yanlışdır.",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -91,9 +149,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await checkAuthStatus(); // Kayıt sonrası kullanıcıyı güncelle
     } catch (error) {
       console.error('Registration failed:', error);
+      const errorMessage = getErrorMessage(error, 'register');
       toast({
         title: "Qeydiyyat xətası",
-        description: "Qeydiyyat zamanı xəta baş verdi.",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -133,9 +192,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
     } catch (error) {
       console.error('Update failed:', error);
+      const errorMessage = getErrorMessage(error, 'register'); // Same validation rules
       toast({
         title: "Yeniləmə xətası",
-        description: "Profil məlumatlarınızı yeniləyərkən xəta baş verdi.",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;

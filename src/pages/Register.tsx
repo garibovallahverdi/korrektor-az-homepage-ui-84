@@ -1,11 +1,14 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const Register = () => {
   const [fullname, setFullname] = useState('');
@@ -15,19 +18,58 @@ export const Register = () => {
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+
+  // Form validasyonu
+  const validateForm = () => {
+    const newErrors: string[] = [];
+
+    if (fullname.length < 2) {
+      newErrors.push('Ad və soyad ən azı 2 hərf olmalıdır.');
+    }
+
+    if (username.length < 3) {
+      newErrors.push('İstifadəçi adı ən azı 3 hərf olmalıdır.');
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      newErrors.push('İstifadəçi adı yalnız hərf, rəqəm və alt xətt (_) olmalıdır.');
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.push('Düzgün e-mail ünvanı daxil edin.');
+    }
+
+    if (password.length < 8) {
+      newErrors.push('Şifrə ən azı 8 hərf olmalıdır.');
+    }
+
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      newErrors.push('Şifrə kiçik hərf, böyük hərf və rəqəm olmalıdır.');
+    }
+
+    if (password !== password2) {
+      newErrors.push('Şifrələr uyğun deyil.');
+    }
+
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setErrors([]);
 
-    if (password !== password2) {
-      alert('Şifrələr uyğun deyil!');
-      setIsLoading(false);
+    // Client-side validation
+    if (!validateForm()) {
       return;
     }
+
+    setIsLoading(true);
 
     try {
       await register({
@@ -52,6 +94,7 @@ export const Register = () => {
       }
       
     } catch (error) {
+      // AuthContext'te hata mesajı gösterilir, burada ek bir şey yapmaya gerek yok
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
@@ -91,6 +134,20 @@ export const Register = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Hata mesajları */}
+          {errors.length > 0 && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <ul className="list-disc list-inside space-y-1">
+                  {errors.map((error, index) => (
+                    <li key={index} className="text-sm">{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullname">Ad Soyad</Label>
@@ -117,11 +174,12 @@ export const Register = () => {
                   type="text"
                   placeholder="İstifadəçi adınızı daxil edin"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   className="pl-10"
                   required
                 />
               </div>
+              <p className="text-xs text-gray-500">Yalnız hərf, rəqəm və alt xətt (_) istifadə edin</p>
             </div>
 
             <div className="space-y-2">
@@ -161,6 +219,7 @@ export const Register = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <p className="text-xs text-gray-500">Ən azı 8 hərf, böyük və kiçik hərf, rəqəm olmalıdır</p>
             </div>
 
             <div className="space-y-2">
