@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { apiService, TextCheckResponse, TextError } from '@/services/api';
-import { CheckCircle, AlertCircle, Copy, RotateCcw, Menu } from 'lucide-react';
+import { CheckCircle, AlertCircle, Copy, RotateCcw, Menu, CheckCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const TextChecker = () => {
@@ -108,6 +108,20 @@ export const TextChecker = () => {
     toast({
       title: 'Tətbiq edildi',
       description: `"${original}" → "${selectedWord}"`,
+    });
+  };
+
+  // Tüm düzeltmeleri uygula
+  const applyAllCorrections = () => {
+    if (!result?.corrected_text.output_sentence) return;
+
+    isManualEdit.current = false;
+    setInputText(result.corrected_text.output_sentence);
+    setErrors([]);
+
+    toast({
+      title: 'Tüm düzeltmeler uygulandı',
+      description: `${errors.length} düzeltme başarıyla uygulandı`,
     });
   };
 
@@ -228,6 +242,20 @@ export const TextChecker = () => {
                   )}
                 </div>
 
+                {/* Tüm Düzeltmeleri Uygula Butonu */}
+                {errors.length > 0 && (
+                  <div className="mb-3">
+                    <Button
+                      onClick={applyAllCorrections}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white text-xs h-8"
+                      size="sm"
+                    >
+                      <CheckCheck className="h-3 w-3 mr-1" />
+                      Tüm Düzeltmeleri Uygula ({errors.length})
+                    </Button>
+                  </div>
+                )}
+
                 {/* Corrected Text */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
@@ -253,6 +281,13 @@ export const TextChecker = () => {
                 {/* Suggestions */}
                 {errors.length > 0 ? (
                   <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-gray-600">Təkliflər</span>
+                      <Badge variant="outline" className="text-xs">
+                        {errors.length} xəta
+                      </Badge>
+                    </div>
+                    
                     {errors.map((err, index) => (
                       <Card key={index} className="border border-red-200 bg-red-50">
                         <CardContent className="p-2 space-y-1">

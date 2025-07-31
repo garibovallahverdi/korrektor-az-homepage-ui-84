@@ -122,25 +122,11 @@ export const HeroDemoSection = () => {
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex justify-center mt-8 gap-4">
-            <button
-              onClick={() => setInputText("")}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
-            >
-              Təmizlə
-            </button>
-            <span className="text-gray-300">•</span>
-            <button
-              onClick={insertSampleText}
-              className="text-sm text-red-500 hover:text-red-700 transition-colors flex items-center gap-1"
-            >
-              Test mətni əlavə et
-            </button>
-          </div>
+        
         </div>
 
         {/* Features Grid - Enhanced */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20 mt-36">
+        <div className="grid md:grid-cols-3 gap-8 mb-20 mt-28">
           <div className="group text-center p-8 bg-white rounded-3xl shadow-lg border border-gray-200 hover:shadow-2xl hover:border-red-200 transition-all duration-300 transform hover:-translate-y-2">
             <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
               <span className="text-3xl">🎯</span>

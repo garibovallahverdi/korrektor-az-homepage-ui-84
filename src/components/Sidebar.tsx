@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LogOut, UserCircle, Settings, X, HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,6 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   const navItems = [
     { to: '/profile/dashboard', label: 'Panel', icon: <UserCircle className="w-4 h-4" /> },
     { to: '/profile/settings', label: 'Tənzimləmələr', icon: <Settings className="w-4 h-4" /> },
-    { to: '/', label: 'Ana Səhifə', icon: <HomeIcon className="w-4 h-4" /> },
   ];
 
   const handleNavClick = () => {
@@ -35,7 +34,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     <aside className="w-64 bg-white border-r h-screen shadow-lg lg:shadow-none">
       {/* Mobile Close Button */}
       {onClose && (
-        <div className="lg:hidden flex justify-end p-4 border-b">
+        <div className="lg:hidden flex justify-end p-4 border-b" >
           <Button
             onClick={onClose}
             variant="ghost"
@@ -49,6 +48,13 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
 
       {/* Navigation */}
       <div className="p-4">
+           <Link to="/" className="flex items-center space-x-2 my-4">
+                    <img
+                      src="/lovable-uploads/7b7bf9b8-3318-4217-8c4e-8a6b622237ce.png"
+                      alt="Korrektor.az"
+                      className="h-8 w-auto"
+                    />
+                  </Link>
         <div className="space-y-2">
           {navItems.map((item) => (
             <NavLink
