@@ -52,13 +52,13 @@ export const HeroDemoSection = () => {
         </div>
 
         {/* Main Input Container - Enhanced Design */}
-        <div className="max-w-4xl mx-auto ">
+        <div className="max-w-5xl mx-auto ">
           <div className={`relative bg-white rounded-3xl shadow-2xl border-2 transition-all duration-300 overflow-hidden ${
             isFocused ? 'border-red-300 shadow-red-100/50' : 'border-gray-200 hover:border-gray-300'
           }`}>
             
             {/* Gradient overlay at the top */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500"></div>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r "></div>
             
             {/* Main Text Area */}
             <div className="p-8">
@@ -67,16 +67,16 @@ export const HeroDemoSection = () => {
                 <span className="text-sm font-medium text-gray-600">Mətninizi daxil edin</span>
               </div>
               
-              <Textarea
-                placeholder="Yoxlamaq istədiyiniz mətni buraya yazın və süni intellektin gücündən faydalanın..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                maxLength={500}
-                className="w-full h-40 bg-transparent border-0 text-gray-900 placeholder-gray-400 resize-none focus:ring-0 focus:outline-none text-lg leading-relaxed"
-                style={{ minHeight: '160px' }}
-              />
+        <Textarea
+  placeholder="Yoxlamaq istədiyiniz mətni buraya yazın və süni intellektin gücündən faydalanın..."
+  value={inputText}
+  onChange={(e) => setInputText(e.target.value)}
+  onFocus={() => setIsFocused(true)}
+  onBlur={() => setIsFocused(false)}
+  maxLength={500}
+  className="w-full h-56 bg-transparent border outline-none focus:outline-none focus:ring-0 focus:border-transparent text-gray-900 placeholder-gray-400 resize-none text-lg leading-relaxed"
+  style={{ minHeight: '160px', boxShadow: 'none' }}
+/>
             </div>
 
             {/* Bottom Controls Bar - Enhanced */}
@@ -120,9 +120,6 @@ export const HeroDemoSection = () => {
               </div>
             </div>
           </div>
-
-          {/* Quick Action Buttons */}
-        
         </div>
 
         {/* Features Grid - Enhanced */}

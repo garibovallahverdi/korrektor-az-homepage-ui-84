@@ -10,7 +10,6 @@ interface SidebarProps {
 
 export const Sidebar = ({ onClose }: SidebarProps) => {
   const { logout } = useAuth();
-  const location = useLocation();
 
   const navItems = [
     { to: '/profile/dashboard', label: 'Panel', icon: <UserCircle className="w-4 h-4" /> },
