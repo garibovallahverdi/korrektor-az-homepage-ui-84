@@ -121,6 +121,7 @@ class ApiService {
     return responseData;
   }
 
+
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await this.request<AuthResponse>(Endpoints.login, {
@@ -181,6 +182,54 @@ class ApiService {
     }
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+  }
+
+async googleAuth(code: string): Promise<AuthResponse> {
+  try {
+    const response = await this.request<AuthResponse>(Endpoints.googleAuth, {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+
+    // Tokenları kaydet
+    localStorage.setItem('accessToken', response.access);
+    localStorage.setItem('refreshToken', response.refresh);
+    
+    return response;
+  } catch (error) {
+    console.error('Google Auth API Error:', error);
+    throw error;
+  }
+}
+
+    async passwordResetRequest(email:string):Promise<any>{
+    const response = await fetch(Endpoints.passwordResetRequest,{
+      method:"POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({email}),
+
+    })
+
+    console.log(await response.json(),"xetaaa");
+    
+    return response
+  }
+
+    async passwordResetConfirm(token:string, new_password :string, re_new_password :string):Promise<any>{
+    const response = await fetch(Endpoints.passwordResetConfirm,{
+      method:"POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({token, new_password , re_new_password }),
+
+    })
+
+    console.log(await response.json(),"xetaaa");
+    
+    return response
   }
 
   async getMe(): Promise<User> {

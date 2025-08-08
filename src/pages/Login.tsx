@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { apiService } from '@/services/api';
 
 export const Login = () => {
   const [username, setUsername] = useState('');
@@ -15,6 +16,11 @@ export const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const google_callback_uri= "http://localhost:3000/profile/dashboard/"
+  // const google_callback_uri = "https://apitest.korrektor.az/api/v1/auth/google/callback/"
+  const google_client_id= "4265358888-h2imv45kqbbs7k85j8snhd745l0fk2qg.apps.googleusercontent.com"
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +72,31 @@ export const Login = () => {
     return registerUrl;
   };
 
+  // Forgot password linkini oluştur
+  const getForgotPasswordLink = () => {
+    const searchParams = new URLSearchParams(location.search);
+    const textParam = searchParams.get('text');
+    const redirectParam = searchParams.get('redirect');
+    
+    let forgotUrl = '/auth/forgot-password';
+    const params = new URLSearchParams();
+    
+    if (redirectParam) {
+      params.set('redirect', redirectParam);
+    }
+    if (textParam) {
+      params.set('text', textParam);
+    }
+    
+    if (params.toString()) {
+      forgotUrl += `?${params.toString()}`;
+    }
+    
+    return forgotUrl;
+  };
+ const googleSignIn = async () => {
+   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${google_callback_uri}&prompt=consent&response_type=code&client_id=${google_client_id}&scope=openid%20email%20profile&access_type=offline`;
+ }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -123,8 +154,26 @@ export const Login = () => {
             >
               {isLoading ? 'Daxil olunur...' : 'Daxil ol'}
             </Button>
+
+            {/* Şifrə unutmusan linki */}
+            <div className="text-center">
+              <Link 
+                to={getForgotPasswordLink()} 
+                className="text-sm text-red-500 hover:text-red-600 hover:underline"
+              >
+                Şifrəni unutmusunuz?
+              </Link>
+            </div>
           </form>
 
+            <Button
+              onClick={googleSignIn}
+              // to={`https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${google_callback_uri}&prompt=consent&response_type=code&client_id=${google_client_id}&scope=openid%20email%20profile&access_type=offline`}
+              className="w-full bg-red-500 block hover:bg-red-600 text-white"
+              // disabled={isLoading}
+            >
+              {isLoading ? 'Daxil olunur...' : 'Google ilə daxil ol'}
+            </Button>
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-600">Hesabınız yoxdur? </span>
             <Link to={getRegisterLink()} className="text-red-500 hover:text-red-600 font-medium">

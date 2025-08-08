@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiService, User, LoginRequest, RegisterRequest, ApiError } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +15,7 @@ interface AuthContextType {
     email?: string;
     plan?: string;
   }) => Promise<void>;
+  refreshUser: () => Promise<void>; // Yeni eklenen fonksiyon
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -190,6 +190,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Public refreshUser fonksiyonu - Google OAuth callback için
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        const userData = await apiService.getMe();
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Refresh user failed:', error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setUser(null);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -301,6 +318,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser, // Yeni eklenen fonksiyon
   };
 
   return (

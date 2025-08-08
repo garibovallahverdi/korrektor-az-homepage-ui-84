@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,7 @@ export const Register = () => {
   const [fullname, setFullname] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,14 +44,17 @@ export const Register = () => {
       newErrors.push('Düzgün e-mail ünvanı daxil edin.');
     }
 
+    // FIX: password1 kullanın password değil
     if (password.length < 8) {
       newErrors.push('Şifrə ən azı 8 hərf olmalıdır.');
     }
 
+    // FIX: password1 kullanın password değil
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       newErrors.push('Şifrə kiçik hərf, böyük hərf və rəqəm olmalıdır.');
     }
 
+    // FIX: password1 kullanın password değil
     if (password !== password2) {
       newErrors.push('Şifrələr uyğun deyil.');
     }
@@ -101,7 +103,14 @@ export const Register = () => {
       }
       
     } catch (error) {
-      console.error('Registration error:', error.username);
+      // FIX: error.username yanlış - error mesajını düzgün yakalayın
+      console.error('Registration error:', error);
+      // Hata mesajını kullanıcıya göster
+      if (error instanceof Error) {
+        setServerErrors([error.message]);
+      } else {
+        setServerErrors(['Kayıt sırasında bir hata oluştu.']);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +138,17 @@ export const Register = () => {
     
     return loginUrl;
   };
+
+  // FIX: useEffect eksik ve hatalı - gereksiz olduğu için kaldırıldı
+  // Gerçek zamanlı validasyon gerekiyorsa aşağıdaki gibi eklenebilir:
+  /*
+  useEffect(() => {
+    // Gerçek zamanlı validasyon
+    if (password1 || password2 || fullname || username || email) {
+      validateForm();
+    }
+  }, [password1, password2, fullname, username, email]);
+  */
 
   // Tüm hataları birleştir
   const allErrors = [...clientErrors, ...serverErrors];
@@ -216,7 +236,7 @@ export const Register = () => {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Şifrənizi daxil edin"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword1(e.target.value)}
                   className="pl-10 pr-10"
                   required
                 />
