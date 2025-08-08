@@ -13,16 +13,24 @@ export const Register = () => {
   const [fullname, setFullname] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword1] = useState('');
+  const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [clientErrors, setClientErrors] = useState<string[]>([]);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  // Google OAuth config
+  // const google_callback_uri = process.env.GOOGLE_CALLBACK_URI;
+  // const google_client_id = process.env.GOOGLE_CLIENT_ID;
+
+  const google_client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const google_callback_uri = import.meta.env.VITE_GOOGLE_CALLBACK_URI;
 
   // Form validasyonu
   const validateForm = () => {
@@ -44,17 +52,14 @@ export const Register = () => {
       newErrors.push('Düzgün e-mail ünvanı daxil edin.');
     }
 
-    // FIX: password1 kullanın password değil
     if (password.length < 8) {
       newErrors.push('Şifrə ən azı 8 hərf olmalıdır.');
     }
 
-    // FIX: password1 kullanın password değil
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       newErrors.push('Şifrə kiçik hərf, böyük hərf və rəqəm olmalıdır.');
     }
 
-    // FIX: password1 kullanın password değil
     if (password !== password2) {
       newErrors.push('Şifrələr uyğun deyil.');
     }
@@ -83,7 +88,6 @@ export const Register = () => {
         password,
         password2,
       });
-      console.log(result);
       
       if (result.success) {
         // URL parametrelerini kontrol et
@@ -103,13 +107,11 @@ export const Register = () => {
       }
       
     } catch (error) {
-      // FIX: error.username yanlış - error mesajını düzgün yakalayın
       console.error('Registration error:', error);
-      // Hata mesajını kullanıcıya göster
       if (error instanceof Error) {
         setServerErrors([error.message]);
       } else {
-        setServerErrors(['Kayıt sırasında bir hata oluştu.']);
+        setServerErrors(['Qeydiyyat zamanı xəta baş verdi.']);
       }
     } finally {
       setIsLoading(false);
@@ -139,33 +141,72 @@ export const Register = () => {
     return loginUrl;
   };
 
-  // FIX: useEffect eksik ve hatalı - gereksiz olduğu için kaldırıldı
-  // Gerçek zamanlı validasyon gerekiyorsa aşağıdaki gibi eklenebilir:
-  /*
-  useEffect(() => {
-    // Gerçek zamanlı validasyon
-    if (password1 || password2 || fullname || username || email) {
-      validateForm();
-    }
-  }, [password1, password2, fullname, username, email]);
-  */
+  const googleSignIn = async () => {
+    setIsGoogleLoading(true);
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${encodeURIComponent(google_callback_uri)}&prompt=consent&response_type=code&client_id=${google_client_id}&scope=openid%20email%20profile&access_type=offline`;
+    window.location.href = googleAuthUrl;
+  };
 
   // Tüm hataları birleştir
   const allErrors = [...clientErrors, ...serverErrors];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-2">
           <CardTitle className="text-2xl font-bold text-gray-900">Qeydiyyat</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-600">
             Yeni hesab yaradın və mətni yoxlaya başlayın
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Google Login Section */}
+          <div className="space-y-3">
+            <Button
+              onClick={googleSignIn}
+              variant="outline"
+              className="w-full h-11 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-center gap-3"
+              disabled={isGoogleLoading}
+            >
+              {isGoogleLoading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+              )}
+              {isGoogleLoading ? 'Google ilə bağlanır...' : 'Google ilə qeydiyyat'}
+            </Button>
+            
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-3 text-gray-500 font-medium">və ya</span>
+              </div>
+            </div>
+          </div>
+
           {/* Hata mesajları */}
           {allErrors.length > 0 && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <ul className="list-disc list-inside space-y-1">
@@ -177,9 +218,12 @@ export const Register = () => {
             </Alert>
           )}
 
+          {/* Regular Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullname">Ad Soyad</Label>
+              <Label htmlFor="fullname" className="text-sm font-medium text-gray-700">
+                Ad Soyad
+              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -188,14 +232,16 @@ export const Register = () => {
                   placeholder="Adınızı və soyadınızı daxil edin"
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">İstifadəçi adı</Label>
+              <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                İstifadəçi adı
+              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -204,7 +250,7 @@ export const Register = () => {
                   placeholder="İstifadəçi adınızı daxil edin"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                  className="pl-10"
+                  className="pl-10 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
                   required
                 />
               </div>
@@ -212,7 +258,9 @@ export const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                E-mail
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -221,14 +269,16 @@ export const Register = () => {
                   placeholder="E-mail ünvanınızı daxil edin"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Şifrə</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                Şifrə
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -236,14 +286,14 @@ export const Register = () => {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Şifrənizi daxil edin"
                   value={password}
-                  onChange={(e) => setPassword1(e.target.value)}
-                  className="pl-10 pr-10"
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -252,7 +302,9 @@ export const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password2">Şifrəni təkrarlayın</Label>
+              <Label htmlFor="password2" className="text-sm font-medium text-gray-700">
+                Şifrəni təkrarlayın
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -261,7 +313,7 @@ export const Register = () => {
                   placeholder="Şifrənizi təkrar daxil edin"
                   value={password2}
                   onChange={(e) => setPassword2(e.target.value)}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
                   required
                 />
               </div>
@@ -269,16 +321,24 @@ export const Register = () => {
 
             <Button
               type="submit"
-              className="w-full bg-red-500 hover:bg-red-600 text-white"
+              className="w-full h-11 bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
               disabled={isLoading}
             >
-              {isLoading ? 'Qeydiyyat edilir...' : 'Qeydiyyat'}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Qeydiyyat edilir...
+                </div>
+              ) : (
+                'Qeydiyyat'
+              )}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">Hesabınız var? </span>
-            <Link to={getLoginLink()} className="text-red-500 hover:text-red-600 font-medium">
+          {/* Login Link */}
+          <div className="text-center">
+            <span className="text-sm text-gray-600">Hesabınız var? </span>
+            <Link to={getLoginLink()} className="text-sm text-red-500 hover:text-red-600 font-medium hover:underline transition-colors">
               Daxil ol
             </Link>
           </div>

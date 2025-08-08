@@ -32,6 +32,7 @@ const Index = () => {
       }
     }
   }, []);
+  const google_client_id =
 
   // Hash değişikliklerini dinle
   useEffect(() => {
