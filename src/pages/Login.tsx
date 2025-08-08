@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { apiService } from '@/services/api';
+import { config } from '@/config/env';
 
 export const Login = () => {
   const [username, setUsername] = useState('');
@@ -22,8 +23,8 @@ export const Login = () => {
   // const google_callback_uri = process.env.GOOGLE_CALLBACK_URI;
   // const google_client_id = process.env.GOOGLE_CLIENT_ID;
 
-  const google_callback_uri = import.meta.env.VITE_GOOGLE_CALLBACK_URI;
-  const google_client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const google_callback_uri = config.googleCallbackUri;
+  const google_client_id = config.googleClientId;
 
   console.log(google_client_id, "client id burda");
   

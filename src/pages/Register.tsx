@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { config } from '@/config/env';
 
 export const Register = () => {
   const [fullname, setFullname] = useState('');
@@ -29,9 +30,8 @@ export const Register = () => {
   // const google_callback_uri = process.env.GOOGLE_CALLBACK_URI;
   // const google_client_id = process.env.GOOGLE_CLIENT_ID;
 
-  const google_client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const google_callback_uri = import.meta.env.VITE_GOOGLE_CALLBACK_URI;
-
+const google_callback_uri = config.googleCallbackUri;
+  const google_client_id = config.googleClientId;
   // Form validasyonu
   const validateForm = () => {
     const newErrors: string[] = [];

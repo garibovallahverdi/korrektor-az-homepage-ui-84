@@ -10,6 +10,7 @@ import { ContactSection } from "@/components/ContactSection";
 import { FAQSection } from "@/components/FAQSection";
 import { Footer } from "@/components/Footer";
 import { HeroDemoSection } from "@/components/HeroDemoSection";
+import { config } from "@/config/env";
 
 const Index = () => {
   useEffect(() => {
@@ -32,7 +33,10 @@ const Index = () => {
       }
     }
   }, []);
-  const google_client_id =
+  const google_client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  console.log(google_client_id, "client id burda");
+  console.log(config.googleClientId, "client id burda 2");
 
   // Hash değişikliklerini dinle
   useEffect(() => {

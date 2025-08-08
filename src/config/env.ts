@@ -6,8 +6,8 @@ interface Config {
 
 const getConfig = (): Config => {
   return {
-    googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
-    googleCallbackUri: import.meta.env.VITE_GOOGLE_CALLBACK_URI || 'http://localhost:3000/auth/google/callback'
+    googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID ,
+    googleCallbackUri: import.meta.env.VITE_GOOGLE_CALLBACK_URI
   };
 };
 
