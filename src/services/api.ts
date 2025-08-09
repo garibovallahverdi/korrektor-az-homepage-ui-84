@@ -212,7 +212,6 @@ async googleAuth(code: string): Promise<AuthResponse> {
 
     })
 
-    console.log(await response.json(),"xetaaa");
     
     return response
   }

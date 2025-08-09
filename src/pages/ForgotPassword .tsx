@@ -26,9 +26,10 @@ export const ForgotPassword = () => {
         }
       // API çağrısı - şifre sıfırlama linki gönder
       const res =await apiService.passwordResetRequest(email)
-      console.log(await res.json(),"xetaa 2");
-      
-      setIsSuccess(true);
+       if(res.ok){
+          console.log(res);
+          setIsSuccess(true);
+       }
     } catch (error: any) {
         console.log(error.message);
         
