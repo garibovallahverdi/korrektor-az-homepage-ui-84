@@ -74,21 +74,21 @@ export const TextChecker = () => {
       const result = await mammoth.extractRawText({ arrayBuffer });
       
       if (!result.value || result.value.trim().length === 0) {
-        throw new Error('Word dosyasından metin çıkarılamadı');
+        throw new Error('Word dosyasından mətin çıxarılamadı');
       }
 
       // Uyarıları göster (eğer varsa)
       if (result.messages && result.messages.length > 0) {
-        console.warn('Word okuma uyarıları:', result.messages);
+        console.warn('Word oxuma bildirimlıri:', result.messages);
       }
 
       return result.value;
     } catch (error) {
-      console.error('Word okuma hatası:', error);
+      console.error('Word oxuma xətası:', error);
       throw new Error(
         error instanceof Error 
-          ? `Word okuma hatası: ${error.message}`
-          : 'Word dosyası okunamadı'
+          ? `Word oxuma xətası: ${error.message}`
+          : 'Word dosyası oxunamadı'
       );
     }
   };
@@ -107,7 +107,7 @@ export const TextChecker = () => {
     
     if (!fileValidation.isValid) {
       toast({
-        title: 'Dosya Güvenlik Xətası',
+        title: 'Fayl təhlükısizlik xətası',
         description: fileValidation.errors.join(', '),
         variant: 'destructive',
       });
@@ -123,8 +123,8 @@ export const TextChecker = () => {
     // Rate limiting kontrolü
     if (!checkRateLimit(getUserId(), 50, 3600000)) {
       toast({
-        title: 'Çok Fazla İstek',
-        description: 'Lütfen bir süre bekleyip tekrar deneyin',
+        title: 'Normadan rtıq istək',
+        description: 'Lütfən bir az sonra  təkrar yoxlayın',
         variant: 'destructive',
       });
       return;
@@ -140,8 +140,8 @@ export const TextChecker = () => {
       if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
         // TXT dosyası okuma
         toast({
-          title: 'Metin Dosyası İşleniyor',
-          description: 'Metin dosyası okunuyor...',
+          title: 'Mətin Faylına baxılır',
+          description: 'Mətin faylı oxunur...',
         });
         
         extractedText = await file.text();
@@ -154,21 +154,21 @@ export const TextChecker = () => {
       ) {
         // Word dosyası okuma
         toast({
-          title: 'Word Dosyası İşleniyor',
-          description: 'Word dosyası okunuyor, lütfen bekleyin...',
+          title: 'Word Faylına baxılır',
+          description: 'Word faylı oxunur,  gözləyin...',
         });
 
         const arrayBuffer = await file.arrayBuffer();
         
         // Word dosya boyut kontrolü (50MB limit)
         if (arrayBuffer.byteLength > 50 * 1024 * 1024) {
-          throw new Error('Word dosyası çok büyük (50MB limit)');
+          throw new Error('Word faylı çox böyük (50MB limit)');
         }
 
         extractedText = await extractTextFromWord(arrayBuffer);
         
       } else {
-        throw new Error(`Desteklenmeyen dosya türü: ${fileType}. Sadece TXT ve Word dosyaları desteklenir.`);
+        throw new Error(`Dəstəklənməyən fayl növü: ${fileType}. Sadəcə TXT ve Word faylları dəstəklənir.`);
       }
 
       // Çıkarılan metni güvenlik kontrolünden geçir
@@ -177,8 +177,8 @@ export const TextChecker = () => {
       if (!validation.isValid) {
         setSecurityThreats(validation.threats);
         toast({
-          title: 'Dosya İçeriği Güvensiz',
-          description: `${validation.threats.length} güvenlik tehdidi tespit edildi`,
+          title: 'Fayl Mətin Təhlükəsi',
+          description: `${validation.threats.length} təhlükəszilik təhdidi aşkarlandı`,
           variant: 'destructive',
         });
       }
@@ -187,15 +187,15 @@ export const TextChecker = () => {
       setSecurityValidation(validation);
 
       toast({
-        title: 'Dosya Başarıyla Okundu',
-        description: `${validation.sanitizedText.length} karakter metin çıkarıldı`,
+        title: 'Fayl Oxundu',
+        description: `${validation.sanitizedText.length} elementdən ibarət mətin çıkarıldı`,
       });
 
     } catch (error) {
-      console.error('Dosya okuma hatası:', error);
+      console.error('Fayl oxuma xətası:', error);
       toast({
         title: 'Dosya Okuma Xətası',
-        description: error instanceof Error ? error.message : 'Dosya okunurken bir hata oluştu',
+        description: error instanceof Error ? error.message : 'Fayl oxunarkən bir xəta oldu',
         variant: 'destructive',
       });
       
@@ -224,8 +224,8 @@ export const TextChecker = () => {
         if (!validation.isValid) {
           setSecurityThreats(validation.threats);
           toast({
-            title: 'URL Parametresi Güvensiz',
-            description: `${validation.threats.length} güvenlik tehdidi tespit edildi`,
+            title: 'URL Parametresi Təhlükəsi',
+            description: `${validation.threats.length} güvənlik təhdidi təyin edildi`,
             variant: 'destructive',
           });
         }
@@ -257,8 +257,8 @@ export const TextChecker = () => {
     // Rate limiting kontrolü
     if (!checkRateLimit(getUserId(), 100, 3600000)) { // Saatte 100 kontrol
       toast({
-        title: 'Çok Fazla İstek',
-        description: 'Lütfen bir süre bekleyip tekrar deneyin',
+        title: 'Normadan Artiq İstək',
+        description: 'Lütfən bir az sonra  təkrar yoxlayın',
         variant: 'destructive',
       });
       return;
@@ -273,8 +273,8 @@ export const TextChecker = () => {
       setIsSecurityBlocked(true);
       
       toast({
-        title: 'Güvenlik Xətası',
-        description: `${validation.threats.length} güvenlik tehdidi tespit edildi. Metin temizlendi.`,
+        title: 'Güvənlik Xətası',
+        description: `${validation.threats.length} güvənlik təhdidi təyin edildi. Mətin təmizləndi.`,
         variant: 'destructive',
       });
       
@@ -341,8 +341,8 @@ export const TextChecker = () => {
     if (!validation.isValid) {
       setSecurityThreats(validation.threats);
       toast({
-        title: 'Güvenlik Uyarısı',
-        description: 'Değişiklik güvenlik tehdidi oluşturuyor',
+        title: 'Təhlükısizlik Bildirimi',
+        description: 'Dəyişiklik güvənlik təhdidi yaradır',
         variant: 'destructive',
       });
       return;
@@ -368,7 +368,7 @@ export const TextChecker = () => {
       setSecurityThreats(validation.threats);
       toast({
         title: 'Güvenlik Uyarısı',
-        description: 'Düzeltmeler güvenlik tehdidi oluşturuyor',
+        description: 'Düzəltmələr güvənlik təhdidi yaradır',
         variant: 'destructive',
       });
       return;
@@ -379,8 +379,8 @@ export const TextChecker = () => {
     setErrors([]);
 
     toast({
-      title: 'Tüm düzeltmeler uygulandı',
-      description: `${errors.length} düzeltme başarıyla uygulandı`,
+      title: 'Bütun düzəltmələt tətbiq edildi.',
+      description: `${errors.length} düzəltmə uğurla tətbiq edildi`,
     });
   };
 
@@ -412,8 +412,8 @@ export const TextChecker = () => {
       if (validation.threats.length > 3) { // Çok fazla tehdit varsa engelle
         setIsSecurityBlocked(true);
         toast({
-          title: 'Güvenlik Engeli',
-          description: 'Çok fazla güvenlik tehdidi tespit edildi',
+          title: 'Təhlükəsizlik Əngəli',
+          description: 'Bir çox güvənlik təhdidi təyin edildi',
           variant: 'destructive',
         });
         return;
